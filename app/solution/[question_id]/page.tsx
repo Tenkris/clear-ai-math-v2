@@ -1,11 +1,20 @@
-import { SolutionSteps } from "@/components/solution-steps"
-import { BackButton } from "@/components/back-button"
-import { UploadedImage } from "@/components/uploaded-image"
-import { QuestionUnderstanding } from "@/components/question-understanding"
-import { SolvingStrategy } from "@/components/solving-strategy"
+import { SolutionSteps } from "@/components/solution-steps";
+import { BackButton } from "@/components/back-button";
+import { UploadedImage } from "@/components/uploaded-image";
+import { QuestionUnderstanding } from "@/components/question-understanding";
+import { SolvingStrategy } from "@/components/solving-strategy";
 
-export default function SolutionPage() {
+interface SolutionPageProps {
+  params: {
+    question_id: string;
+  };
+}
+
+export default function SolutionPage({ params }: SolutionPageProps) {
+  const { question_id } = params;
+
   // Mock data - in a real app, this would come from the uploaded image analysis
+  // In the future, you can use the question_id to fetch specific solution data
   const solutionData = {
     questionUnderstanding:
       "This question asks to solve the given equation x² - 5x + 6 = 0. This involves finding the values of x that make the equation true by using factoring methods.",
@@ -33,7 +42,8 @@ export default function SolutionPage() {
       {
         id: 3,
         title: "Apply the zero product property",
-        content: "If (x - 2)(x - 3) = 0, then either (x - 2) = 0 or (x - 3) = 0.",
+        content:
+          "If (x - 2)(x - 3) = 0, then either (x - 2) = 0 or (x - 3) = 0.",
         workShown: "(x - 2) = 0  or  (x - 3) = 0",
         detailedExplanation:
           "The zero product property states that if the product of two factors equals zero, then at least one of the factors must equal zero. This is because the only way to get a product of zero is if one or more of the factors is zero.",
@@ -49,13 +59,15 @@ export default function SolutionPage() {
       {
         id: 5,
         title: "Verify the solutions",
-        content: "Substitute each solution back into the original equation to verify they are correct.",
-        workShown: "For x = 2: (2)² - 5(2) + 6 = 4 - 10 + 6 = 0 ✓\nFor x = 3: (3)² - 5(3) + 6 = 9 - 15 + 6 = 0 ✓",
+        content:
+          "Substitute each solution back into the original equation to verify they are correct.",
+        workShown:
+          "For x = 2: (2)² - 5(2) + 6 = 4 - 10 + 6 = 0 ✓\nFor x = 3: (3)² - 5(3) + 6 = 9 - 15 + 6 = 0 ✓",
         detailedExplanation:
           "Verification is an important step to ensure our solutions are correct. We substitute each value back into the original equation. If the left side equals the right side (0 in this case), then our solution is correct.",
       },
     ],
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-emerald-100">
@@ -87,10 +99,17 @@ export default function SolutionPage() {
       <main className="container mx-auto px-4 py-8">
         <BackButton />
 
+        {/* Debug info - can be removed in production */}
+        <div className="mb-4 p-2 bg-gray-100 rounded text-sm text-gray-600">
+          Question ID: {question_id}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Analysis and Solution */}
           <div className="space-y-6">
-            <QuestionUnderstanding content={solutionData.questionUnderstanding} />
+            <QuestionUnderstanding
+              content={solutionData.questionUnderstanding}
+            />
             <SolvingStrategy content={solutionData.solvingStrategy} />
 
             {/* Mobile: Show image here */}
@@ -108,5 +127,5 @@ export default function SolutionPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
