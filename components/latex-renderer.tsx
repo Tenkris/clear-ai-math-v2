@@ -17,12 +17,19 @@ export const LaTeXRenderer = ({
 }: LaTeXRendererProps) => {
   // Function to detect and render LaTeX expressions
   const renderContent = (text: string) => {
+    // First, normalize the LaTeX delimiters by converting \\( \\) to $ $
+    let normalizedText = text
+      .replace(/\\\\?\(/g, "$") // Replace \\( or \( with $
+      .replace(/\\\\?\)/g, "$") // Replace \\) or \) with $
+      .replace(/\\\\?\[/g, "$$") // Replace \\[ or \[ with $$
+      .replace(/\\\\?\]/g, "$$"); // Replace \\] or \] with $$
+
     // Patterns for LaTeX expressions
     const inlinePattern = /\$([^$]+)\$/g;
     const blockPattern = /\$\$([^$]+)\$\$/g;
 
-    // First handle block math ($$...$$)
-    const parts = text.split(blockPattern);
+    // Handle block math ($$...$$)
+    const parts = normalizedText.split(blockPattern);
     const elements: (string | React.JSX.Element)[] = [];
 
     for (let i = 0; i < parts.length; i++) {

@@ -266,11 +266,6 @@ export function SolutionSteps({ steps, questionId }: SolutionStepsProps) {
             {loadingFollowUp ? "Asking..." : "Ask"}
           </button>
         </div>
-        <div className="flex justify-end mt-2">
-          <span className="text-sm text-gray-500">
-            {conversation.length} / 2
-          </span>
-        </div>
       </div>
     </div>
   );
