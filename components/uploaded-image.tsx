@@ -1,13 +1,33 @@
-import { Download, ZoomIn, ZoomOut } from "lucide-react"
+"use client";
 
-export function UploadedImage() {
+import { Download, ZoomIn, ZoomOut } from "lucide-react";
+
+interface UploadedImageProps {
+  imageUrl?: string;
+}
+
+export function UploadedImage({ imageUrl }: UploadedImageProps) {
+  const getImageFileName = (url?: string) => {
+    if (!url) return "Math_Problem.jpg";
+    try {
+      const urlParts = url.split("/");
+      return urlParts[urlParts.length - 1] || "Math_Problem.jpg";
+    } catch {
+      return "Math_Problem.jpg";
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* PDF-like header */}
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">IMG</div>
-          <span className="text-sm font-medium text-gray-700">Quadratic_Equation_Problem.jpg</span>
+          <div className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
+            IMG
+          </div>
+          <span className="text-sm font-medium text-gray-700">
+            {getImageFileName(imageUrl)}
+          </span>
         </div>
         <button className="p-1 hover:bg-gray-200 rounded">
           <Download className="h-4 w-4 text-gray-600" />
@@ -31,11 +51,27 @@ export function UploadedImage() {
       {/* Image content */}
       <div className="p-6 h-[500px] flex items-center justify-center">
         <div className="w-full h-full bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-          <div className="text-center">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt="Uploaded math problem"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              }}
+            />
+          ) : null}
+          <div className={`text-center ${imageUrl ? "hidden" : ""}`}>
             <div className="bg-white p-8 rounded-lg shadow-sm border max-w-sm mx-auto">
               <div className="border-2 border-red-500 rounded p-4 mb-4">
-                <p className="text-lg font-medium text-gray-800 mb-2">1. Solve the equation.</p>
-                <p className="text-2xl font-mono text-gray-800">x² - 5x + 6 = 0</p>
+                <p className="text-lg font-medium text-gray-800 mb-2">
+                  1. Solve the equation.
+                </p>
+                <p className="text-2xl font-mono text-gray-800">
+                  x² - 5x + 6 = 0
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="border border-gray-300 rounded p-2">
@@ -52,5 +88,5 @@ export function UploadedImage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
