@@ -164,9 +164,9 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
         <BackButton />
 
         {/* Debug info - can be removed in production */}
-        <div className="mb-4 p-2 bg-gray-100 rounded text-sm text-gray-600">
+        {/* <div className="mb-4 p-2 bg-gray-100 rounded text-sm text-gray-600">
           Question ID: {question_id}
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Analysis and Solution */}

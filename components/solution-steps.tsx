@@ -16,6 +16,11 @@ interface StepExplanation {
   key_concepts: string;
 }
 
+interface FollowUpResponse {
+  user_message: string;
+  ai_response: string;
+}
+
 interface SolutionStepsProps {
   steps: Step[];
   questionId: string;
@@ -32,6 +37,8 @@ export function SolutionSteps({ steps, questionId }: SolutionStepsProps) {
   const [expandedExplanations, setExpandedExplanations] = useState<Set<number>>(
     new Set()
   );
+  const [conversation, setConversation] = useState<FollowUpResponse[]>([]);
+  const [loadingFollowUp, setLoadingFollowUp] = useState(false);
 
   const handleGetExplanation = async (stepNumber: number) => {
     if (explanations.has(stepNumber)) {
@@ -85,11 +92,44 @@ export function SolutionSteps({ steps, questionId }: SolutionStepsProps) {
     }
   };
 
-  const handleFollowUpSubmit = () => {
-    if (followUpQuestion.trim()) {
-      // Handle follow-up question submission
-      console.log("Follow-up question:", followUpQuestion);
+  const handleFollowUpSubmit = async () => {
+    if (!followUpQuestion.trim()) return;
+
+    setLoadingFollowUp(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/v1/question/${questionId}/ask`,
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: followUpQuestion.trim(),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to ask follow-up question: ${response.statusText}`
+        );
+      }
+
+      const followUpData: FollowUpResponse = await response.json();
+
+      // Add the new conversation to the list
+      setConversation((prev) => [...prev, followUpData]);
+
+      // Clear the input
       setFollowUpQuestion("");
+    } catch (error) {
+      console.error("Error asking follow-up question:", error);
+      // You could show an error message to the user here
+    } finally {
+      setLoadingFollowUp(false);
     }
   };
 
@@ -159,6 +199,46 @@ export function SolutionSteps({ steps, questionId }: SolutionStepsProps) {
 
       {/* Follow-up Question Section */}
       <div className="mt-8 pt-6 border-t border-gray-200">
+        {/* Conversation History */}
+        {conversation.length > 0 && (
+          <div className="mb-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Follow-up Questions
+            </h3>
+            {conversation.map((item, index) => (
+              <div key={index} className="space-y-3">
+                {/* User Question */}
+                <div className="bg-emerald-50 rounded-lg p-4 border-l-4 border-emerald-400">
+                  <div className="flex items-start gap-2">
+                    <MessageCircle className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-emerald-900 mb-1">
+                        Your Question
+                      </h4>
+                      <p className="text-gray-700">{item.user_message}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Response */}
+                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                  <div className="flex items-start gap-2">
+                    <div className="h-5 w-5 rounded-full bg-blue-600 flex items-center justify-center mt-0.5 flex-shrink-0">
+                      <span className="text-white text-xs font-bold">AI</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-900 mb-1">Answer</h4>
+                      <div className="text-gray-700 leading-relaxed">
+                        <LaTeXRenderer content={item.ai_response} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="flex gap-3">
           <div className="flex-1">
             <input
@@ -167,20 +247,29 @@ export function SolutionSteps({ steps, questionId }: SolutionStepsProps) {
               onChange={(e) => setFollowUpQuestion(e.target.value)}
               placeholder="Ask a follow-up question"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              onKeyPress={(e) => e.key === "Enter" && handleFollowUpSubmit()}
+              onKeyPress={(e) =>
+                e.key === "Enter" && !loadingFollowUp && handleFollowUpSubmit()
+              }
+              disabled={loadingFollowUp}
             />
           </div>
           <button
             onClick={handleFollowUpSubmit}
-            disabled={!followUpQuestion.trim()}
+            disabled={!followUpQuestion.trim() || loadingFollowUp}
             className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
-            <MessageCircle className="h-4 w-4" />
-            Ask
+            {loadingFollowUp ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MessageCircle className="h-4 w-4" />
+            )}
+            {loadingFollowUp ? "Asking..." : "Ask"}
           </button>
         </div>
         <div className="flex justify-end mt-2">
-          <span className="text-sm text-gray-500">1 / 2</span>
+          <span className="text-sm text-gray-500">
+            {conversation.length} / 2
+          </span>
         </div>
       </div>
     </div>
